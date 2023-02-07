@@ -4,19 +4,20 @@ SELECT Titre_representation
 FROM representations
 
 -- b
-SELECT *
+SELECT titre_representation
 FROM representations
 WHERE Lieu = "l'opéra Bastille"
 
 -- c
 SELECT nom, titre_representation
-FROM musicien, representations
-WHERE musicien.`N°representation` = representations.`N°representation`
+FROM musicien m, representations r
+WHERE m.`N°representation` = r.`N°representation`
 
 -- d
 SELECT Titre_representation, Lieu, Date
-FROM representations, programmer
-WHERE representations.`N°representation`= programmer.`N°representation` AND DATE = "2014-09-14"
+FROM representations r, programmer p
+WHERE r.`N°representation`= p.`N°representation` 
+AND DATE = "2014-09-14"
 
 
 -- exercice 2
@@ -37,44 +38,42 @@ WHERE etudiant.`N°etudiant` = evaluer.`N°etudiant` AND evaluer.codemat = matie
 GROUP BY Nom,Prenom,LibelleMat,coefmat;
 
 -- d
-SELECT libellemat, coefmat,AVG(note) AS MoyenneMatiere 
-FROM matiere ,evaluer
-WHERE matiere.codemat = evaluer.codemat
-GROUP BY libellemat, coefmat;
+SELECT libellemat, AVG(Moyenne_eleve)
+FROM Moyenne_eleve
+GROUP BY libellemat
 
 -- e
 CREATE VIEW MoyenneGeneral
 AS
-SELECT nom, prenom, AVG(note) AS moyenne 
-FROM evaluer, etudiant 
-WHERE evaluer.`N°etudiant` = etudiant.`N°etudiant`
+SELECT nom, prenom, SUM(Moyenne_eleve*coefmat)/SUM(coefmat) AS MGEtudiant
+FROM Moyenne_eleve
 GROUP BY nom, prenom;
 
 -- f
-SELECT AVG(note)
-FROM evaluer
+SELECT AVG(MGEtudiant)
+FROM MoyenneGeneral
 
 -- g
-SELECT nom, prenom, moyenne
-FROM moyennegeneral 
-WHERE moyenne>= (SELECT AVG(moyenne) FROM moyennegeneral);
+SELECT nom, prenom, MGEtudiant
+FROM MoyenneGeneral 
+WHERE MGEtudiant>= (SELECT AVG(MGEtudiant) FROM MoyenneGeneral);
 
 
 -- exercice 3
 -- a
 SELECT noArt, libelle, stock
 FROM articles
-WHERE stock < "10"
+WHERE stock < 10
 
 -- b
 SELECT *
 FROM articles
-WHERE prixInvent BETWEEN "100" AND "300"
+WHERE prixInvent BETWEEN 100 AND 300
 
 -- c
 SELECT *
 FROM fournisseurs
-WHERE NOT adrFour
+WHERE adrFour IS NULL
 
 -- d
 SELECT *
@@ -84,14 +83,15 @@ WHERE nomFour LIKE "STE%"
 -- e
 SELECT nomFour, adrFour, villeFour,delai
 FROM fournisseurs, acheter
-WHERE fournisseurs.noFour = acheter.noFour AND delai > "20"
+WHERE fournisseurs.noFour = acheter.noFour 
+AND delai > 20
 
 -- f
 SELECT COUNT(*)
 FROM articles
 
 -- g
-SELECT SUM(prixInvent) AS valeurStock
+SELECT SUM(prixInvent*stock) AS valeurStock
 FROM articles
 
 -- h
@@ -125,7 +125,7 @@ FROM etudiant
 ORDER BY nom DESC 
 
 -- c
-SELECT libelle, coef
+SELECT libelle, coef*100
 FROM matiere 
 
 -- d
@@ -166,7 +166,7 @@ SELECT COUNT(*) AS nbTotalEpreuves
 FROM epreuve
 
 -- l
-SELECT *
+SELECT COUNT(*)
 FROM notation
 WHERE note IS NULL
 
@@ -179,14 +179,12 @@ WHERE epreuve.codeMat = matiere.codeMat
 SELECT note, nom, prenom
 FROM etudiant,notation
 WHERE etudiant.numEtu = notation.numEtu 
-ORDER BY nom
 
 -- o
 SELECT note, nom,prenom,libelle
 FROM notation, etudiant, matiere
 WHERE notation.numEtu = etudiant.numEtu 
 AND notation.codeMat = matiere.codeMat
-ORDER BY nom
 
 -- p
 SELECT nom, prenom,note
@@ -220,7 +218,7 @@ FROM epreuve, etudiant, notation
 WHERE epreuve.codeMat = notation.codeMat
 AND etudiant.numEtu = notation.numEtu
 GROUP BY numEpreuve
-HAVING COUNT(*)>=6
+HAVING COUNT(*)<6
 
 
 -- exercice 5
